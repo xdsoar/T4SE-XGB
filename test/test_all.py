@@ -15,13 +15,12 @@ from sklearn.metrics import confusion_matrix
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 
-np.random.seed(100)
-    # print(np.random.random())
-for i in range(100):
-        print(np.random.random())
 
+# 根据建议，这里不需要使用随机数 https://stackoverflow.com/questions/42191717/scikit-learn-random-state-in-splitting-dataset
+# np.random.seed()
 RANDOM_SEED =  0
 
+# 整理数据， 输出ACC，RE，Pr，F1， MCC5个评估值
 def metri(true_labels_cv,predictions,m):
     ACC = []
     Re = []
@@ -85,30 +84,20 @@ df1 = pd.read_csv('159labels.csv',header=None)
 y_test = []
 y_test=df1.iloc[:,0]
 
+# 定义 svm模型使用的参数
+svm_alg = SVC(gamma=0.03125, C = 4, random_state = RANDOM_SEED)
 
-clf1 = RandomForestClassifier(n_estimators=300, max_features = 'sqrt', random_state = RANDOM_SEED,n_jobs=-1)
-clf2 = GaussianNB()
-clf3 = XGBClassifier(n_estimators=700,  learning_rate = 0.1,n_jobs=-1)
-clf4 = LogisticRegression(multi_class='auto', solver = 'liblinear', random_state = RANDOM_SEED,n_jobs=-1)
-clf5 = GradientBoostingClassifier(n_estimators=300,  learning_rate = 0.2, random_state = RANDOM_SEED)
-clf6 = SVC(gamma=0.03125, C = 4, random_state = RANDOM_SEED)
-clf7 = ExtraTreesClassifier(n_estimators=900, max_features = 'sqrt', random_state = RANDOM_SEED,n_jobs=-1)
-clf8 = KNeighborsClassifier(n_neighbors =2,n_jobs=-1)
-clf9 = MLPClassifier(hidden_layer_sizes=(48,16), max_iter=1000, random_state = RANDOM_SEED)
-
-
+# 对训练集和测试集进行min max预处理
 min_max = preprocessing.MinMaxScaler()
 min_max.fit(X_train)
 trainplus = min_max.transform(X_train)
 testplus = min_max.transform(X_test)
 
-for clf, label in zip([clf1, clf2, clf3,clf4,clf5,clf6,clf7,clf8,clf9], 
-                      ['RandomForest','GaussianNB',' XGBoost','LogisticRegression','GradientBoosting','SVM','ExtraTrees','KNN','MLP']):
-
-        model=clf.fit(trainplus, y_train)
-        y_pred = model.predict(testplus)
-        #print(y_pred)
-        ALL9 = metri(y_test,y_pred,6)
-        #result.append(ALL9)    
-        print("----------------------------------------prediction-result-----------------------"+label+"------------------------------------------------")
-        print(ALL9)
+# 调用SVM算法，并输出结果
+model=svm_alg.fit(trainplus, y_train)
+y_pred = model.predict(testplus)
+#print(y_pred)
+ALL9 = metri(y_test,y_pred,6)
+#result.append(ALL9)    
+print("打印SVM计算结果")
+print(ALL9)
